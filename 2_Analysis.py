@@ -7,30 +7,74 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
+# --------------------------------   Cleaning / Transformation   --------------------------------
 
-print("############# Analysis Is Started ##########")
-
+print("############# Cleaning & Transformation Started ##########")
 
 df = pd.read_csv('users.csv')
 
+# ===================== 1. Handle Missing Values =====================
+# maidenName contains many missing values → replace with 'Unknown'
+df['maidenName'] = df['maidenName'].replace('', 'Unknown')
+df['maidenName'] = df['maidenName'].fillna('Unknown')
 
-#--------------------------------   Cleaning/Preparation   --------------------------------
+
+# ===================== 2. Extract Useful Columns =====================
+# Extract country and city from nested address columns
+df['country'] = df['address.country']
+df['city'] = df['address.city']
 
 
-###################### maidenName column has 148 Null so it is better to drop it ######################
-df.drop(columns='maidenName',inplace=True)
+# ===================== 3. Standardize Text Data =====================
+# Standardizing text avoids issues like Male / male / MALE
+df['gender'] = df['gender'].str.lower().str.strip()
+df['role'] = df['role'].str.lower().str.strip()
+df['city'] = df['city'].str.title().str.strip()
+df['country'] = df['country'].str.title().str.strip()
 
-###################### Add new column "country" extracted from Address ######################
 
-df['country']=df['address.country']
+# ===================== 4. Remove Duplicate Records =====================
+# Ensure each user appears only once (using email as unique identifier)
+df.drop_duplicates(subset='email', inplace=True)
 
-###################### Add new column "city" extracted from Address ######################
 
-df['city']=df['address.city']
+# ===================== 5. Feature Engineering - Age Groups =====================
+# Create age categories for better demographic analysis
+df['age_group'] = pd.cut(
+    df['age'],
+    bins=[0, 25, 35, 50, 100],
+    labels=['Young', 'Adult', 'Mid-Age', 'Senior']
+)
+
+
+# ===================== 6. Feature Engineering - Email Domain =====================
+# Extract domain from email to analyze organization/provider distribution
+df['email_domain'] = df['email'].str.split('@').str[1]
+
+
+# ===================== 7. Derived Metric - BMI Calculation =====================
+# Convert height from cm to meters
+df['height_meter'] = df['height'] / 100
+
+# Calculate Body Mass Index (BMI)
+df['BMI'] = df['weight'] / (df['height_meter'] ** 2)
+
+
+# ===================== 8. BMI Classification =====================
+# Categorize users based on BMI health ranges
+df['BMI_category'] = pd.cut(
+    df['BMI'],
+    bins=[0, 18.5, 25, 30, 100],
+    labels=['Underweight', 'Normal', 'Overweight', 'Obese']
+)
+
+
+print("############# Cleaning & Transformation DONE ##########")
 
 
 #--------------------------------  Analysis   --------------------------------
 
+print("############# Analysis Started ! ##########")
 
 #################### Average Age by role ######################
 sns.set_style("whitegrid")
@@ -188,5 +232,6 @@ plt.close()
 
 
 print("############# Analysis DONE ! ##########")
-print("############# plots are saved in plots folder #############")
+print("############# plots are saved in plots directory #############")
+
 
