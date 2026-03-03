@@ -10,26 +10,52 @@
 
 A containerized Python project that automates the journey from raw API data to polished visual insights. This pipeline handles data extraction, cleaning, and statistical visualization using a "plug-and-play" Docker environment.
 
+<img width="2250" height="1196" alt="project_overview" src="https://github.com/user-attachments/assets/6022e3c2-e697-4756-86b3-d6816a39a087" />
+
 
 ---
 ## 🏗️ Architecture & Workflow
 
 The pipeline follows a classic **ETL (Extract, Transform, Load)** pattern, ensuring that data retrieval is decoupled from the analysis logic.
 
-1.  **Extract (`1_Fetching_Data.py`):**
-    * Connects to the **DummyJSON API**.
-    * Implements **pagination logic** (using `limit` and `skip` parameters) to ensure all user records are captured regardless of API defaults.
-    * Saves the raw response into a structured `users.csv`.
 
-2.  **Transform & Analyze (`2_Analysis.py`):**
-    * **Data Cleaning:** Handles missing values, drops redundant fields (like `maidenName`), and flattens nested JSON objects (like addresses) into flat columns.
-    * **Data Normalization:** Ensures numerical consistency for height, weight, and age.
-    * **Statistical Analysis:** Performs aggregations to find trends across demographics.
 
-3.  **Visualize (Output):**
-    * Generates **8 high-resolution plots** using Seaborn and Matplotlib.
-    * Automatically exports results to the `/plots` directory as `.png` files.
+### 1. **Extract (`1_Fetching_Data.py`):**
+- Connects to the **DummyJSON API**.
+- Implements pagination logic (`limit` & `skip`) to retrieve the complete dataset.
+- Converts nested JSON responses into tabular format.
+- Stores raw data locally as `users.csv`.
 
+
+
+### 2. **Transform & Analyze (`2_Analysis.py`):**
+
+The transformation stage simulates a **real-world data preprocessing workflow** before analysis.
+
+##### 🧹 Data Cleaning
+- Handles missing values by replacing empty or null entries (e.g., `maidenName`) with standardized placeholders.
+- Removes duplicate records using email as a unique identifier.
+- Standardizes categorical text fields (`gender`, `role`, `city`, `country`) to ensure consistent grouping and aggregation.
+
+##### 🔧 Data Transformation & Feature Engineering
+- Extracts structured fields such as **city** and **country** from nested address data.
+- Creates demographic **age groups** for segmentation analysis.
+- Extracts **email domains** to enable organizational/provider-level insights.
+- Converts height units and derives **Body Mass Index (BMI)** as a new analytical metric.
+- Classifies users into **BMI health categories** (Underweight, Normal, Overweight, Obese).
+
+##### 📊 Statistical Analysis
+Performs aggregations and exploratory analysis across demographics such as:
+- Age distribution
+- Gender balance
+- Geographic concentration
+- Physical attribute trends
+
+
+
+### 3. **Visualize (Output):**
+- Generates **8 high-resolution visualizations** using Seaborn and Matplotlib.
+- Automatically exports analytical results into the `/plots` directory as `.png` files.
 ---
 
 ## 📦 How to Run
